@@ -1,18 +1,17 @@
 <?php declare(strict_types=1);
 namespace Careminate\Exceptions;
 
+use Throwable;
 
 class HttpException extends \Exception
 {
-    private int $statusCode = 400;
+    public function __construct(string $message = "", private int $statusCode = 500, int $code = 0, ?Throwable $previous = null) 
+    {
+        parent::__construct($message, $code, $previous);
+    }
 
     public function getStatusCode(): int
     {
         return $this->statusCode;
-    }
-
-    public function setStatusCode(int $statusCode): void
-    {
-        $this->statusCode = $statusCode;
     }
 }
