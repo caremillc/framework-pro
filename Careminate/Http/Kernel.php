@@ -9,36 +9,65 @@ use Careminate\Exceptions\HttpException;
 
 class Kernel
 {
+    private string $appEnv;
+    private string $appKey;
+    private string $appVersion;
+
     public function __construct(
         private RouterInterface $router,
         private ContainerInterface $container
-    )
-    {
-    }
+    ){
+        // Check .env file and configuration values
+        if (!file_exists('.env') || !is_readable('.env')) {
+            throw new \RuntimeException('.env file is missing or not readable.');
+        }
 
+        $this->appEnv = $this->container->get('APP_ENV');
+        $this->appKey = $this->container->get('APP_KEY');
+        $this->appVersion = $this->container->get('APP_VERSION');
+
+        if (empty($this->appKey) || empty($this->appEnv) || empty($this->appVersion)) {
+            throw new \RuntimeException('One or more required environment variables are missing.');
+        }
+    }
+    
     public function handle(Request $request): Response
     {
         try {
-
             [$routeHandler, $vars] = $this->router->dispatch($request, $this->container);
-
             
-             // Validate that the routeHandler is actually callable
+            // Debugging
             if (!is_callable($routeHandler)) {
-                throw new HttpException('Route handler is not callable', 500);
-            }
-            
-            $response = call_user_func_array($routeHandler, $vars);
-            
-            // Ensure the response is actually a Response object
-            if (!$response instanceof Response) {
-                return new Response((string)$response, 200);
+                throw new \RuntimeException("Invalid route handler returned by router.");
             }
 
-        } catch (HttpException $exception) {
-            $response = new Response($exception->getMessage(), $exception->getStatusCode());
+            $response = call_user_func_array($routeHandler, $vars);
+
+        } catch (\Exception $exception) {
+            $response = $this->createExceptionResponse($exception);
         }
 
         return $response;
     }
+
+
+    private function createExceptionResponse(\Exception $exception): Response
+	{
+		// Check if the environment is development or local testing
+		if (in_array($this->appEnv, ['dev', 'local', 'test'])) {
+			// In development or local testing, rethrow the exception for detailed debugging
+			throw $exception;
+		}
+
+		// Production environment handling
+		if ($exception instanceof HttpException) {
+			// Return a response with the HTTP status and message for HTTP exceptions
+			return new Response($exception->getMessage(), $exception->getStatusCode());
+		}
+
+		// For all other exceptions, return a generic server error message
+		return new Response('Server error, CHECK app_env', Response::HTTP_INTERNAL_SERVER_ERROR);
+	}
+
 }
+
