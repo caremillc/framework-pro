@@ -129,6 +129,11 @@ class Request
         return (string)parse_url($this->server['REQUEST_URI'] ?? '', PHP_URL_PATH);
     }
 
+    // public function getPathInfo(): string
+    // {
+    //     return parse_url($this->server['REQUEST_URI'] ?? '?', PHP_URL_PATH) ?? '';
+    // }
+
     /**
      * Get a value from the consolidated request data
      */
