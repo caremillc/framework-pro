@@ -4,8 +4,9 @@ namespace Careminate\Routing;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use Careminate\Http\Requests\Request;
-use function FastRoute\simpleDispatcher;
+use Psr\Container\ContainerInterface;
 use Careminate\Exceptions\HttpException;
+use function FastRoute\simpleDispatcher;
 use Careminate\Exceptions\HttpRequestMethodException;
 
 class Router implements RouterInterface
@@ -18,20 +19,24 @@ class Router implements RouterInterface
         $this->routes = $routes;
     }
 
-    public function dispatch(Request $request): array
+    public function dispatch(Request $request, ContainerInterface $container): array  // this ContainerInterface
     {
+        // Extract route info based on the current request
         $routeInfo = $this->extractRouteInfo($request);
 
+        // Unpack route handler and variables
         [$handler, $vars] = $routeInfo;
 
         if (is_array($handler)) {
-            [$controller, $method] = $handler;
-            $handler = [new $controller, $method];
+            // Extract the controller and method from the handler
+            [$controllerId, $method] = $handler;
+            $controller = $container->get($controllerId);  // this code
+            $handler = [$controller, $method];
         }
 
+        // Return the controller and method along with route variables
         return [$handler, $vars];
     }
-
     private function extractRouteInfo(Request $request): array
     { 
 	  $requestedPath = $request->getPathInfo(); // Get requested URI
