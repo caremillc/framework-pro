@@ -3,13 +3,21 @@ namespace Careminate\Routing;
 
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
-use function FastRoute\simpleDispatcher;
 use Careminate\Http\Requests\Request;
+use function FastRoute\simpleDispatcher;
 use Careminate\Exceptions\HttpException;
 use Careminate\Exceptions\HttpRequestMethodException;
 
 class Router implements RouterInterface
-{
+{ 
+    private array $routes;
+    
+    public function setRoutes(array $routes): void
+    {
+        //$routes is parsed from setRoutes in $container
+        $this->routes = $routes;
+    }
+
     public function dispatch(Request $request): array
     {
         $routeInfo = $this->extractRouteInfo($request);
@@ -37,9 +45,9 @@ class Router implements RouterInterface
         $dispatcher = simpleDispatcher(function (RouteCollector $routeCollector) {
 
               // Dynamically load routes from the external file
-              $routes = require_once route_path('web.php');
+            //   $routes = require_once route_path('web.php');
 
-            foreach ($routes as $route) {
+            foreach ($this->routes as $route) {   // $this->routes
                 $routeCollector->addRoute(...$route);
             }
         });

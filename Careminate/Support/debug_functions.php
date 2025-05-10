@@ -2,7 +2,7 @@
 
 if (!function_exists('dd')) {
     /**
-     * Dump and die with styled output
+     * Dump and die with styled output and collapsible elements
      * 
      * @param mixed ...$vars Variables to dump
      * @return never
@@ -13,7 +13,7 @@ if (!function_exists('dd')) {
         
         // Start output buffering if in browser mode
         if (!$isCli) {
-            // Apply styling for browser output
+            // Apply styling for browser output with collapsible functionality
             echo '<!DOCTYPE html>
             <html>
             <head>
@@ -42,6 +42,24 @@ if (!function_exists('dd')) {
                         font-size: 14px;
                         display: flex;
                         justify-content: space-between;
+                        align-items: center;
+                    }
+                    .dd-controls {
+                        display: flex;
+                        gap: 10px;
+                    }
+                    .dd-control-btn {
+                        cursor: pointer;
+                        background-color: #333;
+                        color: #f8f8f2;
+                        border: none;
+                        padding: 4px 8px;
+                        border-radius: 4px;
+                        font-size: 12px;
+                        transition: background-color 0.2s;
+                    }
+                    .dd-control-btn:hover {
+                        background-color: #555;
                     }
                     .dd-content {
                         padding: 15px;
@@ -78,7 +96,199 @@ if (!function_exists('dd')) {
                     .backtrace-highlight {
                         color: #e6db74;
                     }
+                    .collapsible {
+                        cursor: pointer;
+                    }
+                    .collapse-toggle {
+                        display: inline-block;
+                        width: 16px;
+                        height: 16px;
+                        line-height: 16px;
+                        text-align: center;
+                        background-color: #444;
+                        color: #fff;
+                        border-radius: 2px;
+                        margin-right: 5px;
+                        cursor: pointer;
+                        font-size: 12px;
+                        user-select: none;
+                    }
+                    .collapsed .collapse-content {
+                        display: none;
+                    }
+                    .collapsed .collapse-toggle:before {
+                        content: "+";
+                    }
+                    .expanded .collapse-toggle:before {
+                        content: "-";
+                    }
+                    .collapse-preview {
+                        display: none;
+                        color: #75715e;
+                        font-style: italic;
+                        padding-left: 5px;
+                    }
+                    .collapsed .collapse-preview {
+                        display: inline;
+                    }
+                    .search-container {
+                        margin-bottom: 10px;
+                        display: flex;
+                        gap: 10px;
+                    }
+                    .search-input {
+                        flex-grow: 1;
+                        background-color: #333;
+                        color: #f8f8f2;
+                        border: 1px solid #444;
+                        padding: 8px;
+                        border-radius: 4px;
+                    }
+                    .search-btn {
+                        background-color: #444;
+                        color: #f8f8f2;
+                        border: none;
+                        padding: 8px 12px;
+                        border-radius: 4px;
+                        cursor: pointer;
+                    }
+                    .search-btn:hover {
+                        background-color: #555;
+                    }
+                    .highlight-search {
+                        background-color: #ff8;
+                        color: #000;
+                    }
                 </style>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function() {
+                        // Initialize all collapsible elements
+                        initializeCollapsibles();
+                        
+                        // Add event listeners for expand/collapse all buttons
+                        document.querySelectorAll(".expand-all").forEach(btn => {
+                            btn.addEventListener("click", function() {
+                                const container = this.closest(".dd-container");
+                                expandAll(container);
+                            });
+                        });
+                        
+                        document.querySelectorAll(".collapse-all").forEach(btn => {
+                            btn.addEventListener("click", function() {
+                                const container = this.closest(".dd-container");
+                                collapseAll(container);
+                            });
+                        });
+                        
+                        // Add event listeners for search
+                        document.querySelectorAll(".search-form").forEach(form => {
+                            form.addEventListener("submit", function(e) {
+                                e.preventDefault();
+                                const container = this.closest(".dd-container");
+                                const searchTerm = this.querySelector(".search-input").value;
+                                searchInContainer(container, searchTerm);
+                            });
+                        });
+                    });
+                    
+                    function initializeCollapsibles() {
+                        document.querySelectorAll(".collapse-toggle").forEach(toggle => {
+                            toggle.addEventListener("click", function() {
+                                const wrapper = this.closest(".collapsible");
+                                toggleCollapse(wrapper);
+                            });
+                        });
+                    }
+                    
+                    function toggleCollapse(element) {
+                        if (element.classList.contains("expanded")) {
+                            element.classList.remove("expanded");
+                            element.classList.add("collapsed");
+                        } else {
+                            element.classList.remove("collapsed");
+                            element.classList.add("expanded");
+                        }
+                    }
+                    
+                    function expandAll(container) {
+                        container.querySelectorAll(".collapsible").forEach(item => {
+                            item.classList.remove("collapsed");
+                            item.classList.add("expanded");
+                        });
+                    }
+                    
+                    function collapseAll(container) {
+                        container.querySelectorAll(".collapsible").forEach(item => {
+                            item.classList.remove("expanded");
+                            item.classList.add("collapsed");
+                        });
+                    }
+                    
+                    function searchInContainer(container, term) {
+                        if (!term) return;
+                        
+                        // Remove previous highlights
+                        container.querySelectorAll(".highlight-search").forEach(el => {
+                            el.outerHTML = el.innerHTML;
+                        });
+                        
+                        // Simple search (case insensitive)
+                        const regex = new RegExp(term, "gi");
+                        const content = container.querySelector(".dd-content");
+                        
+                        // Auto-expand all nodes that contain the search term
+                        expandNodesWithTerm(content, term.toLowerCase());
+                        
+                        // Highlight matches
+                        highlightMatches(content, regex);
+                    }
+                    
+                    function expandNodesWithTerm(element, term) {
+                        if (element.textContent.toLowerCase().includes(term)) {
+                            // Find all parent collapsible elements and expand them
+                            let parent = element;
+                            while (parent) {
+                                if (parent.classList && parent.classList.contains("collapsible")) {
+                                    parent.classList.remove("collapsed");
+                                    parent.classList.add("expanded");
+                                }
+                                parent = parent.parentElement;
+                            }
+                        }
+                        
+                        // Process children
+                        Array.from(element.children).forEach(child => {
+                            expandNodesWithTerm(child, term);
+                        });
+                    }
+                    
+                    function highlightMatches(element, regex) {
+                        // Skip script tags
+                        if (element.tagName === "SCRIPT") return;
+                        
+                        // Check text nodes
+                        Array.from(element.childNodes).forEach(node => {
+                            if (node.nodeType === 3) { // Text node
+                                const content = node.textContent;
+                                if (regex.test(content)) {
+                                    const highlighted = content.replace(regex, match => 
+                                        `<span class="highlight-search">${match}</span>`
+                                    );
+                                    const tempDiv = document.createElement("div");
+                                    tempDiv.innerHTML = highlighted;
+                                    
+                                    // Replace text node with highlighted content
+                                    while (tempDiv.firstChild) {
+                                        element.insertBefore(tempDiv.firstChild, node);
+                                    }
+                                    element.removeChild(node);
+                                }
+                            } else if (node.nodeType === 1) { // Element node
+                                highlightMatches(node, regex);
+                            }
+                        });
+                    }
+                </script>
             </head>
             <body>
                 <h1 style="color: #f92672; margin-bottom: 20px;">Debug Dump</h1>';
@@ -98,12 +308,24 @@ if (!function_exists('dd')) {
                 echo '<div class="dd-container">';
                 echo '<div class="dd-header">';
                 echo '<span>' . htmlspecialchars($varName) . ' (' . $type . ')</span>';
+                echo '<div class="dd-controls">';
+                echo '<button class="dd-control-btn expand-all">Expand All</button>';
+                echo '<button class="dd-control-btn collapse-all">Collapse All</button>';
                 echo '<span>Called from: ' . htmlspecialchars(basename($file)) . ':' . $line . '</span>';
                 echo '</div>';
+                echo '</div>';
+                
+                echo '<div class="search-container">';
+                echo '<form class="search-form" style="display: flex; width: 100%;">';
+                echo '<input type="text" class="search-input" placeholder="Search in this dump..." style="flex-grow: 1;">';
+                echo '<button type="submit" class="search-btn">Search</button>';
+                echo '</form>';
+                echo '</div>';
+                
                 echo '<div class="dd-content">';
                 echo '<pre>';
                 
-                // Enhanced output with syntax highlighting for browser
+                // Enhanced output with syntax highlighting and collapsible sections
                 echo formatVar($var);
                 
                 echo '</pre>';
@@ -142,8 +364,6 @@ if (!function_exists('dd')) {
         exit(1);
     }
 }
-
-
 
 /**
  * Try to determine the variable name from debug_backtrace
@@ -228,7 +448,7 @@ function getHumanReadableType(mixed $var): string
 }
 
 /**
- * Format a variable with syntax highlighting for browser output
+ * Format a variable with syntax highlighting and collapsible sections
  *
  * @param mixed $var
  * @param int $depth
@@ -252,28 +472,75 @@ function formatVar(mixed $var, int $depth = 0, int $maxDepth = 10): string
     } elseif (is_int($var) || is_float($var)) {
         $output .= '<span class="number">' . $var . '</span>';
     } elseif (is_array($var)) {
-        $output .= '<span class="array">array:' . count($var) . ' [</span>';
-        $indent = str_repeat('  ', $depth + 1);
+        $count = count($var);
+        $isEmpty = $count === 0;
+        $collapsibleClass = $depth > 0 ? 'collapsible expanded' : 'collapsible expanded';
         
-        if (!empty($var)) {
+        $previewContent = '';
+        if ($count > 0) {
+            $previewItems = array_slice($var, 0, 3, true);
+            $previewParts = [];
+            foreach ($previewItems as $key => $val) {
+                $previewParts[] = is_string($key) ? '"' . $key . '"' : $key;
+            }
+            if (count($var) > 3) {
+                $previewParts[] = '...';
+            }
+            $previewContent = ' <span class="collapse-preview">' . implode(', ', $previewParts) . '</span>';
+        }
+        
+        $output .= '<span class="' . $collapsibleClass . '">';
+        if (!$isEmpty) {
+            $output .= '<span class="collapse-toggle"></span>';
+        }
+        $output .= '<span class="array">array:' . $count . ' [</span>' . $previewContent;
+        
+        if (!$isEmpty) {
+            $output .= '<span class="collapse-content">';
+            $indent = str_repeat('  ', $depth + 1);
             $output .= "\n";
             foreach ($var as $key => $value) {
                 $output .= $indent . formatKey($key) . ' => ' . formatVar($value, $depth + 1, $maxDepth) . "\n";
             }
             $output .= str_repeat('  ', $depth);
+            $output .= '</span>'; // end collapse-content
         }
         
         $output .= '<span class="array">]</span>';
+        $output .= '</span>'; // end collapsible
     } elseif (is_object($var)) {
         $className = get_class($var);
-        $output .= '<span class="object">' . $className . ' {</span>';
-        $indent = str_repeat('  ', $depth + 1);
-        
         $reflection = new ReflectionObject($var);
         $properties = $reflection->getProperties();
+        $isEmpty = count($properties) === 0;
+        $collapsibleClass = $depth > 0 ? 'collapsible expanded' : 'collapsible expanded';
         
-        if (!empty($properties)) {
+        $previewContent = '';
+        if (!$isEmpty) {
+            $previewParts = [];
+            $propCount = 0;
+            foreach ($properties as $property) {
+                if ($propCount >= 3) break;
+                $previewParts[] = $property->getName();
+                $propCount++;
+            }
+            if (count($properties) > 3) {
+                $previewParts[] = '...';
+            }
+            $previewContent = ' <span class="collapse-preview">' . implode(', ', $previewParts) . '</span>';
+        }
+        
+        $output .= '<span class="' . $collapsibleClass . '">';
+        if (!$isEmpty) {
+            $output .= '<span class="collapse-toggle"></span>';
+        }
+        $output .= '<span class="object">' . $className . ' {</span>' . $previewContent;
+        
+        if (!$isEmpty) {
+            $output .= '<span class="collapse-content">';
+            $indent = str_repeat('  ', $depth + 1);
             $output .= "\n";
+            
             foreach ($properties as $property) {
                 $property->setAccessible(true);
                 $propertyName = $property->getName();
@@ -282,10 +549,13 @@ function formatVar(mixed $var, int $depth = 0, int $maxDepth = 10): string
                 $visibility = $property->isPublic() ? 'public' : ($property->isProtected() ? 'protected' : 'private');
                 $output .= $indent . '<span class="property">' . $visibility . ' ' . $propertyName . '</span> => ' . formatVar($propertyValue, $depth + 1, $maxDepth) . "\n";
             }
+            
             $output .= str_repeat('  ', $depth);
+            $output .= '</span>'; // end collapse-content
         }
         
         $output .= '<span class="object">}</span>';
+        $output .= '</span>'; // end collapsible
     } elseif (is_resource($var)) {
         $output .= 'resource:' . get_resource_type($var);
     } else {
