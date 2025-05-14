@@ -1,11 +1,12 @@
 <?php declare(strict_types=1);
 namespace Careminate\Http;
 
-use Careminate\Http\Requests\Request;
-use Careminate\Http\Responses\Response;
+
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
+use Careminate\Http\Requests\Request;
+use Careminate\Http\Responses\Response;
 
 class Kernel
 {
@@ -49,7 +50,7 @@ class Kernel
                 [$status, [$controller, $method], $vars] = $routeInfo;
 
                 // Call the handler, provided by the route info, in order to create a Response
-                $response = (new $controller())->$method($vars);
+                $response = call_user_func_array([new $controller, $method], $vars);
 
                 // Call the handler, provided by the route info, in order to create a Response
                 return $response;
