@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 namespace Careminate\Http;
 
+use Careminate\Http\Requests\Request;
+use Careminate\Http\Responses\Response;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
-use Careminate\Http\Requests\Request;
-use Careminate\Http\Responses\Response;
 
 class Kernel
 {
@@ -13,66 +13,26 @@ class Kernel
 
     public function __construct()
     {
-        // Initialize routes array for dynamic route registration
+        // Initialize routes array for dynamic route registration if needed.
     }
 
+    /**
+     * Handles the incoming request and returns the appropriate response.
+     *
+     * @param Request $request
+     * @return Response
+     */
     public function handle(Request $request): Response
     {
-        // Create the dispatcher with dynamic route registration
+        // Create the dispatcher with dynamic route registration from the 'web.php' routes file
         $dispatcher = simpleDispatcher(function (RouteCollector $routeCollector) {
-            // Register GET routes
-            $routeCollector->addRoute('GET', '/', function () {
+            // Dynamically load routes from the external file
+            $routes = require_once route_path('web.php');
 
-                $content = '<h1>Hello World</h1>';
-
-                return new Response($content);
-            });
-
-            // Register POST route
-            $routeCollector->addRoute('GET', '/posts', function () {
-                $content = "<h1>All Post</h1>, 201";
-                return new Response($content);
-            });
-            // Register POST route
-            $routeCollector->addRoute('GET', '/posts/create', function () {
-                $content = "<h1>Post Created</h1>, 201";
-                return new Response($content);
-            });
-
-            // Register POST route
-            $routeCollector->addRoute('POST', '/posts/store', function () {
-                $content = "<h1>Store Post</h1>, 301";
-                return new Response($content);
-            });
-
-            // Register a parameterized GET route
-            $routeCollector->addRoute('GET', '/posts/{id:\d+}/show', function ($vars) {
-                $content = "<h1>This is Post {$vars['id']}</h1>";
-                return new Response($content);
-            });
-
-            // Register a parameterized GET route
-            $routeCollector->addRoute('GET', '/posts/{id:\d+}/edit', function ($vars) {
-                $content = "<h1>This is Post {$vars['id']}</h1>";
-                return new Response($content);
-            });
-            // Register PUT route
-            $routeCollector->addRoute('PUT', '/posts/{id:\d+}/update', function ($vars) {
-                $content = "<h1>Post {$vars['id']} Updated</h1>";
-                return new Response($content);
-            });
-
-            // Register DELETE route
-            $routeCollector->addRoute('DELETE', '/posts/{id:\d+}/delete', function ($vars) {
-                $content = "<h1>Post {$vars['id']} Deleted</h1>";
-                return new Response($content);
-            });
-
-            // Example of handling a wildcard route for a catch-all (e.g., for an API)
-            $routeCollector->addRoute('GET', '/{wildcard:.+}', function ($vars) {
-                $content = "<h1>Wildcard match for: {$vars['wildcard']}</h1>";
-                return new Response($content);
-            });
+            foreach ($routes as $route) {
+                // Register each route
+                $routeCollector->addRoute(...$route);
+            }
         });
 
         // Dispatch the request URI and method
@@ -84,12 +44,10 @@ class Kernel
         // Unpack route information
         [$status, $handler, $vars] = $routeInfo;
 
-        // dd($routeInfo);
-
-        // Handle the route and return a response
+        // Handle the route and return a response based on the dispatch status
         switch ($status) {
             case Dispatcher::FOUND:
-                // Route matched, call the handler and return the response
+                // Route matched, execute handler and return response
                 return $handler($vars);
 
             case Dispatcher::METHOD_NOT_ALLOWED:
@@ -101,8 +59,8 @@ class Kernel
                 return new Response('<h1>404 Not Found</h1>', 404);
         }
 
-        // Handle 404 Not Found if no matching route is found
-        return new Response("<h1>404 Not Found</h1>", 404);
+        // Fallback: If an unknown error occurs, return a generic 500 response
+        return new Response('<h1>Something went wrong</h1>', 500);
     }
-
 }
+
