@@ -2,22 +2,14 @@
 
 namespace Careminate\Http;
 
-use Careminate\Routing\Router;
 use Careminate\Http\Requests\Request;
 use Careminate\Http\Responses\Response;
+use Careminate\Routing\RouterInterface;
 use Careminate\Exceptions\HttpException;
 
-/**
- * HTTP Kernel
- * 
- * The Kernel class serves as the central point for handling incoming HTTP requests
- * and returning the appropriate responses by dispatching them through the router.
- */
 class Kernel
 {
-    public function __construct(private Router $router)
-    {
-    }
+    public function __construct(private RouterInterface $router){}
 
     public function handle(Request $request): Response
     {
