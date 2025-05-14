@@ -3,46 +3,41 @@ namespace Careminate\Routing;
 
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
+use function FastRoute\simpleDispatcher;
 use Careminate\Http\Requests\Request;
 use Careminate\Exceptions\HttpException;
-use function FastRoute\simpleDispatcher;
 use Careminate\Exceptions\HttpRequestMethodException;
 
 class Router implements RouterInterface
 {
     public function dispatch(Request $request): array
     {
-        // Extract route info based on the current request
         $routeInfo = $this->extractRouteInfo($request);
 
-        // Unpack route handler and variables
         [$handler, $vars] = $routeInfo;
 
         if (is_array($handler)) {
-            // Extract the controller and method from the handler
             [$controller, $method] = $handler;
             $handler = [new $controller, $method];
         }
 
-        // Return the controller and method along with route variables
         return [$handler, $vars];
     }
 
-
-    private function extractRouteInfo(Request $request)
+    private function extractRouteInfo(Request $request): array
     { 
-        $requestedPath = $request->getPathInfo(); // Get requested URI
+	  $requestedPath = $request->getPathInfo(); // Get requested URI
         
         // Ignore requests for favicon.ico
        if ($requestedPath === '/favicon.ico') {
            return [null, []]; // Return a no-op response
        }
-
+	   
         // Create a dispatcher
         $dispatcher = simpleDispatcher(function (RouteCollector $routeCollector) {
 
-               // Dynamically load routes from the external file
-            $routes = require_once route_path('web.php');
+              // Dynamically load routes from the external file
+              $routes = require_once route_path('web.php');
 
             foreach ($routes as $route) {
                 $routeCollector->addRoute(...$route);
