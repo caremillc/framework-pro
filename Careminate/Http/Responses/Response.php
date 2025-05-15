@@ -116,6 +116,7 @@ class Response
     public const HTTP_SERVICE_UNAVAILABLE = 503;
     public const HTTP_GATEWAY_TIMEOUT = 504;
 
+    
     /**
      * Default JSON encoding options
      */
