@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Careminate\Http;
 
+use Doctrine\DBAL\Connection;
 use Careminate\Http\Requests\Request;
 use Psr\Container\ContainerInterface;
 use Careminate\Http\Responses\Response;
@@ -30,34 +31,30 @@ class Kernel
             throw new \RuntimeException('One or more required environment variables are missing.');
         }
     }
-
+    
     public function handle(Request $request): Response
     {
         try {
-
-           [$routeHandler, $vars] = $this->router->dispatch($request, $this->container);
-
+             dd($this->container->get(Connection::class));
+             
+            [$routeHandler, $vars] = $this->router->dispatch($request, $this->container);
             
-             // Validate that the routeHandler is actually callable
+            // Debugging
             if (!is_callable($routeHandler)) {
-                throw new HttpException('Route handler is not callable', 500);
-            }
-            
-            $response = call_user_func_array($routeHandler, $vars);
-            
-            // Ensure the response is actually a Response object
-            if (!$response instanceof Response) {
-                return new Response((string)$response, 200);
+                throw new \RuntimeException("Invalid route handler returned by router.");
             }
 
-        } catch (HttpException $exception) {
+            $response = call_user_func_array($routeHandler, $vars);
+
+        } catch (\Exception $exception) {
             $response = $this->createExceptionResponse($exception);
         }
 
         return $response;
     }
 
-     private function createExceptionResponse(\Exception $exception): Response
+
+    private function createExceptionResponse(\Exception $exception): Response
 	{
 		// Check if the environment is development or local testing
 		if (in_array($this->appEnv, ['dev', 'local', 'test'])) {
@@ -72,6 +69,7 @@ class Kernel
 		}
 
 		// For all other exceptions, return a generic server error message
-		return new Response('Server error', Response::HTTP_INTERNAL_SERVER_ERROR);
+		return new Response('Server error, CHECK app_env', Response::HTTP_INTERNAL_SERVER_ERROR);
 	}
+
 }
