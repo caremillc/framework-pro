@@ -35,8 +35,12 @@ class Kernel
     public function handle(Request $request): Response
     {
         try {
-             dd($this->container->get(Connection::class));
+            // dd($this->container->get(Connection::class));
              
+            //    $db = $this->container->get(Connection::class);
+            //    $result = $db->executeQuery('SELECT 1')->fetchOne();
+            //    dd("Database connected. Result: $result");
+
             [$routeHandler, $vars] = $this->router->dispatch($request, $this->container);
             
             // Debugging
