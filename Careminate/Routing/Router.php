@@ -7,6 +7,7 @@ use Careminate\Http\Requests\Request;
 use Psr\Container\ContainerInterface;
 use Careminate\Exceptions\HttpException;
 use function FastRoute\simpleDispatcher;
+use Careminate\Http\Controllers\AbstractController;
 use Careminate\Exceptions\HttpRequestMethodException;
 
 class Router implements RouterInterface
@@ -31,6 +32,9 @@ class Router implements RouterInterface
             // Extract the controller and method from the handler
             [$controllerId, $method] = $handler;
             $controller = $container->get($controllerId);  // this code
+            if (is_subclass_of($controller, AbstractController::class)) {
+                $controller->setRequest($request);
+            }
             $handler = [$controller, $method];
         }
 
