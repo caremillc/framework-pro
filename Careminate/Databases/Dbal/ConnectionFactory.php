@@ -14,4 +14,5 @@ class ConnectionFactory
     {
         return DriverManager::getConnection(['url' => $this->databaseUrl]);
     }
+    
 }
