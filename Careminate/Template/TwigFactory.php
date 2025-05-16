@@ -2,13 +2,16 @@
 namespace Careminate\Template;
 
 use Twig\Environment;
-use Twig\Extension\DebugExtension;
+use Twig\TwigFunction;
 use Twig\Loader\FilesystemLoader;
+use Twig\Extension\DebugExtension;
+use Careminate\Sessions\SessionInterface;
 
 
 class TwigFactory
 {
-    public function __construct(
+     public function __construct(
+        private SessionInterface $session,
         private string $templatesPath
     ){}
 
@@ -25,9 +28,14 @@ class TwigFactory
 
         // add new twig session() function to Environment
         $twig->addExtension(new DebugExtension());
-
+        // add session
+        $twig->addFunction(new TwigFunction('session', [$this, 'getSession']));
         return $twig;
     }
 
+   public function getSession(): SessionInterface
+    {
+        return $this->session;
+    }
   
 }
