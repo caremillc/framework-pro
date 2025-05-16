@@ -179,6 +179,10 @@ class Response
         return $this->headers[$normalizedName] ?? null;
     }
 
+//  public function getHeader(string $name): ?string
+//     {
+//         return $this->headers[strtolower($name)] ?? null;
+//     }
     /**
      * Remove a header by name
      */
@@ -247,6 +251,8 @@ class Response
         return $this->status;
     }
 
+
+   
     /**
      * Get the status text for the current status code
      */
