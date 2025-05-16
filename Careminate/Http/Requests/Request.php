@@ -361,4 +361,5 @@ class Request
     {
         return $this->isMethod('OPTIONS');
     }
+    
 }
