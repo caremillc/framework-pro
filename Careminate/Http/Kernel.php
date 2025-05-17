@@ -7,6 +7,7 @@ use Psr\Container\ContainerInterface;
 use Careminate\Http\Responses\Response;
 use Careminate\Routing\RouterInterface;
 use Careminate\Exceptions\HttpException;
+use Careminate\Http\Middlewares\Contracts\RequestHandlerInterface;
 
 class Kernel
 {
@@ -16,7 +17,8 @@ class Kernel
 
     public function __construct(
         private RouterInterface $router,
-        private ContainerInterface $container
+        private ContainerInterface $container,
+        private RequestHandlerInterface $requestHandler  //this 1
     ){
         // Check .env file and configuration values
         if (!file_exists('.env') || !is_readable('.env')) {
@@ -34,21 +36,27 @@ class Kernel
     
     public function handle(Request $request): Response
     {
+         // Early return for favicon.ico if not explicitly handled
+        if ($request->getPathInfo() === '/favicon.ico') {
+            return new Response('', Response::HTTP_NO_CONTENT);
+        }
+
         try {
-            // dd($this->container->get(Connection::class));
+            $response = $this->requestHandler->handle($request);  //this 2
+            // // dd($this->container->get(Connection::class));
              
-            //    $db = $this->container->get(Connection::class);
-            //    $result = $db->executeQuery('SELECT 1')->fetchOne();
-            //    dd("Database connected. Result: $result");
+            // //    $db = $this->container->get(Connection::class);
+            // //    $result = $db->executeQuery('SELECT 1')->fetchOne();
+            // //    dd("Database connected. Result: $result");
 
-            [$routeHandler, $vars] = $this->router->dispatch($request, $this->container);
+            // [$routeHandler, $vars] = $this->router->dispatch($request, $this->container);
             
-            // Debugging
-            if (!is_callable($routeHandler)) {
-                throw new \RuntimeException("Invalid route handler returned by router.");
-            }
+            // // Debugging
+            // if (!is_callable($routeHandler)) {
+            //     throw new \RuntimeException("Invalid route handler returned by router.");
+            // }
 
-            $response = call_user_func_array($routeHandler, $vars);
+            // $response = call_user_func_array($routeHandler, $vars);
 
         } catch (\Exception $exception) {
             $response = $this->createExceptionResponse($exception);
