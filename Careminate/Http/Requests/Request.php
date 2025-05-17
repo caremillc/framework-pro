@@ -2,12 +2,15 @@
 namespace Careminate\Http\Requests;
 
 use Careminate\Support\Arr;
+use Careminate\Sessions\SessionInterface;
 
 /**
  * HTTP Request class that handles and normalizes request data
  */
 class Request
 {
+     private SessionInterface $session;
+     
     /**
      * HTTP methods that can contain request body data
      */
@@ -360,6 +363,16 @@ class Request
     public function isOptions(): bool
     {
         return $this->isMethod('OPTIONS');
+    }
+    
+     public function setSession(SessionInterface $session): void
+    {
+        $this->session = $session;
+    }
+	
+	public function getSession(): SessionInterface
+    {
+        return $this->session;
     }
     
 }

@@ -21,7 +21,7 @@ class RouterDispatch implements MiddlewareInterface
 
         $response = call_user_func_array($routeHandler, $vars);
 
-        dd($response);
+        // dd($response);
         return $response;
 
         

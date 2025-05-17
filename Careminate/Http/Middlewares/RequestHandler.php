@@ -9,9 +9,10 @@ use Careminate\Http\Middlewares\Contracts\RequestHandlerInterface;
 class RequestHandler implements RequestHandlerInterface
 {
     private array $middleware = [
+        StartSession::class,  // this
         Authenticate::class,
         RouterDispatch::class,
-        //SuccessMiddleware::class
+        // SuccessMiddleware::class
     ];
     
     public function __construct(private ContainerInterface $container){}
