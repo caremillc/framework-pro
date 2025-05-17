@@ -10,11 +10,13 @@ class RequestHandler implements RequestHandlerInterface
 {
     private array $middleware = [
         Authenticate::class,
-        SuccessMiddleware::class
+        RouterDispatch::class,
+        //SuccessMiddleware::class
     ];
-
+    
     public function __construct(private ContainerInterface $container){}
     
+
     public function handle(Request $request): Response
     {
         // If there are no middleware classes to execute, return a default response
@@ -33,4 +35,5 @@ class RequestHandler implements RequestHandlerInterface
 
         return $response;
     }
+
 }
