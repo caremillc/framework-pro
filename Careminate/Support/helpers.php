@@ -97,3 +97,12 @@ if (!function_exists('view')) {
         return $response;
     }
 }
+
+
+if (! function_exists('storage_path')) {
+   function storage_path(string $path = ''): string
+    {
+        return BASE_PATH . '/storage' . ($path ? '/' . ltrim($path, '/') : '');
+    }
+}
+
