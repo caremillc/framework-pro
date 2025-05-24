@@ -36,7 +36,7 @@ class Kernel
     {
         try {
 
-           dd($this->container->get(Connection::class));
+        //    dd($this->container->get(Connection::class));
               
            [$routeHandler, $vars] = $this->router->dispatch($request, $this->container);
 

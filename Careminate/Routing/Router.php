@@ -1,13 +1,14 @@
 <?php declare (strict_types = 1);
 namespace Careminate\Routing;
 
-use Careminate\Exceptions\HttpException;
-use Careminate\Exceptions\HttpRequestMethodException;
-use Careminate\Http\Requests\Request;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
-use function FastRoute\simpleDispatcher;
+use Careminate\Http\Requests\Request;
 use Psr\Container\ContainerInterface;
+use Careminate\Exceptions\HttpException;
+use function FastRoute\simpleDispatcher;
+use Careminate\Http\Controllers\AbstractController;
+use Careminate\Exceptions\HttpRequestMethodException;
 
 class Router implements RouterInterface
 {
@@ -39,10 +40,13 @@ class Router implements RouterInterface
 
         [$controllerId, $method] = $handler;
         $controller              = $container->get($controllerId);
-
+            if (is_subclass_of($controller, AbstractController::class)) {
+                $controller->setRequest($request);
+            }
         return [[$controller, $method], $vars];
     }
 
+     
     private function extractRouteInfo(Request $request): array | null
     {
         $requestedPath = $request->getPathInfo();

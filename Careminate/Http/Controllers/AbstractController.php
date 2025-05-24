@@ -1,13 +1,14 @@
 <?php declare(strict_types=1);
 namespace Careminate\Http\Controllers;
 
+use Careminate\Http\Requests\Request;
 use Psr\Container\ContainerInterface;
 use Careminate\Http\Responses\Response;
 
 abstract class AbstractController
 {
     protected ?ContainerInterface $container = null;
-
+    protected Request $request;
   
     public function setContainer(ContainerInterface $container): void
     {
@@ -15,7 +16,11 @@ abstract class AbstractController
         $this->container = $container;
     }
 
-   
+    public function setRequest(Request $request): void
+    {
+        $this->request = $request;
+    }
+    
     public function render(string $template, array $parameters = [], ?Response $response = null): Response
     {
         // Render the template using the Twig service from the container.
@@ -29,6 +34,8 @@ abstract class AbstractController
 
         // Return the response object with the rendered content.
         return $response;
+        
     }
     
+
 }
