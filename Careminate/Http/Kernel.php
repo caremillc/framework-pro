@@ -11,5 +11,6 @@ class Kernel
          $content = '<h1>Hello World from Http Kernel</h1>';
 
         return new Response($content);
+        
     }
 }
