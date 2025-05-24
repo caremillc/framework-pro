@@ -30,5 +30,4 @@ abstract class AbstractController
         // Return the response object with the rendered content.
         return $response;
     }
-    
 }
