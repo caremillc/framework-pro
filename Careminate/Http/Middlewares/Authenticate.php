@@ -6,11 +6,16 @@ use Careminate\Http\Responses\Response;
 use Careminate\Http\Middlewares\Contracts\MiddlewareInterface;
 use Careminate\Http\Middlewares\Contracts\RequestHandlerInterface;
 
-class StartSession implements MiddlewareInterface
+class Authenticate implements MiddlewareInterface
 {
+    private bool $authenticated = true;
+
     public function process(Request $request, RequestHandlerInterface $requestHandler): Response
     {
+        if (!$this->authenticated) {
+            return new Response('Authentication failed', 401);
+        }
+
         return $requestHandler->handle($request);
     }
-	// flash messages will not work until wecomplete the StartSession class
 }

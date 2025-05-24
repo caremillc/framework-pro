@@ -6,11 +6,10 @@ use Careminate\Http\Responses\Response;
 use Careminate\Http\Middlewares\Contracts\MiddlewareInterface;
 use Careminate\Http\Middlewares\Contracts\RequestHandlerInterface;
 
-class StartSession implements MiddlewareInterface
+class SuccessMiddleware implements MiddlewareInterface
 {
     public function process(Request $request, RequestHandlerInterface $requestHandler): Response
     {
-        return $requestHandler->handle($request);
+        return new Response('OMG Middlewares are worked!!', 200);
     }
-	// flash messages will not work until wecomplete the StartSession class
 }
