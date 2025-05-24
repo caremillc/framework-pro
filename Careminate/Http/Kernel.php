@@ -2,54 +2,50 @@
 
 namespace Careminate\Http;
 
+use Careminate\Routing\Router;
 use Careminate\Http\Requests\Request;
 use Careminate\Http\Responses\Response;
-use FastRoute\Dispatcher;
-use FastRoute\RouteCollector;
-use function FastRoute\simpleDispatcher;
 
+/**
+ * HTTP Kernel
+ * 
+ * The Kernel class serves as the central point for handling incoming HTTP requests
+ * and returning the appropriate responses by dispatching them through the router.
+ */
 class Kernel
 {
-    protected $routes = [];
-
-    public function __construct()
+    /**
+     * Create a new Kernel instance
+     * 
+     * @param Router $router Router instance used for dispatching requests
+     */
+    public function __construct(private Router $router)
     {
-        // Initialize routes array for dynamic route registration
     }
 
+    /**
+     * Handle the incoming HTTP request
+     * 
+     * Dispatches the request through the router, executes the appropriate handler,
+     * and returns the resulting response. Catches any exceptions and returns them
+     * as error responses.
+     * 
+     * @param Request $request The incoming HTTP request
+     * @return Response The HTTP response
+     */
     public function handle(Request $request): Response
     {
-        $dispatcher = simpleDispatcher(function (RouteCollector $routeCollector) {
-            $routes = require_once route_path('web.php');
-            foreach ($routes as $route) {
-                $routeCollector->addRoute(...$route);
-            }
-        });
+        try {
 
-        $routeInfo = $dispatcher->dispatch(
-            $request->getMethod(),
-            $request->getPathInfo()
-        );
+            [$routeHandler, $vars] = $this->router->dispatch($request);
+            
+            $response = call_user_func_array($routeHandler, $vars);
 
-        switch ($routeInfo[0]) {
-            case Dispatcher::FOUND:
-                [$handler, $vars] = [$routeInfo[1], $routeInfo[2]];
-
-                // Ensure $handler is [ControllerClass::class, 'method']
-                [$controller, $method] = $handler;
-
-                // return (new $controller())->$method($vars);
-                return call_user_func_array([new $controller, $method], $vars);
-
-            case Dispatcher::METHOD_NOT_ALLOWED:
-                return new Response('<h1>405 Method Not Allowed</h1>', 405);
-
-            case Dispatcher::NOT_FOUND:
-                return new Response('<h1>404 Not Found</h1>', 404);
-
-            default:
-                return new Response('<h1>Unexpected routing error</h1>', 500);
+        } catch (\Exception $exception) {
+            $response = new Response($exception->getMessage(), 400);
         }
+        
+        return $response;
     }
 }
 
