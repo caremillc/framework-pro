@@ -33,6 +33,10 @@ class TwigFactory
          // Pass environment variables to Twig templates
         $this->addEnvironmentVariablesToTwig($twig);
 
+              // Add the title variable if it exists in the session or globally
+       $title = $this->getTitleFromContext();
+       $twig->addGlobal('title', $title);
+
         return $twig;
     }
 
@@ -66,4 +70,13 @@ class TwigFactory
    
        // You can easily add more variables here following the same pattern
    }
+
+   /**
+     * Retrieve the title from the session or any globally accessible context.
+     */
+    private function getTitleFromContext(): string
+    {
+        // Check if a title is set in the session or globally (for example, via controller or other context)
+        return $this->session->get('title') ?? config('app.name'); ; // Default to an empty string if no title exists
+    }
 }
