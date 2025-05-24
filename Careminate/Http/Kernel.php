@@ -7,6 +7,7 @@ use Psr\Container\ContainerInterface;
 use Careminate\Http\Responses\Response;
 use Careminate\Routing\RouterInterface;
 use Careminate\Exceptions\HttpException;
+use Careminate\Http\Middlewares\Contracts\RequestHandlerInterface;
 
 class Kernel
 {
@@ -16,7 +17,8 @@ class Kernel
 
     public function __construct(
         private RouterInterface $router,
-        private ContainerInterface $container
+        private ContainerInterface $container,
+        private RequestHandlerInterface $requestHandler  //step 1
     ){
         // Check .env file and configuration values
         if (!file_exists('.env') || !is_readable('.env')) {
@@ -34,24 +36,30 @@ class Kernel
 
     public function handle(Request $request): Response
     {
-        try {
+        // Early return for favicon.ico if not explicitly handled
+        if ($request->getPathInfo() === '/favicon.ico') {
+            return new Response('', Response::HTTP_NO_CONTENT);
+        }
 
-        //    dd($this->container->get(Connection::class));
-              
-           [$routeHandler, $vars] = $this->router->dispatch($request, $this->container);
+        try {
+              $response = $this->requestHandler->handle($request);  //step 2
+            // dd($this->container->get(Connection::class));
+            
+			// taken to RouterDispatch
+          // [$routeHandler, $vars] = $this->router->dispatch($request, $this->container);
 
             
              // Validate that the routeHandler is actually callable
-            if (!is_callable($routeHandler)) {
-                throw new HttpException('Route handler is not callable', 500);
-            }
+            // if (!is_callable($routeHandler)) {
+            //     throw new HttpException('Route handler is not callable', 500);
+            // }
             
-            $response = call_user_func_array($routeHandler, $vars);
+            //$response = call_user_func_array($routeHandler, $vars);
             
             // Ensure the response is actually a Response object
-            if (!$response instanceof Response) {
-                return new Response((string)$response, 200);
-            }
+           // if (!$response instanceof Response) {
+              //  return new Response((string)$response, 200);
+          //  }
 
         } catch (HttpException $exception) {
             $response = $this->createExceptionResponse($exception);
