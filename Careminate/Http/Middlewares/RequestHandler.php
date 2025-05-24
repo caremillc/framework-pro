@@ -8,12 +8,12 @@ use Careminate\Http\Middlewares\Contracts\RequestHandlerInterface;
 
 class RequestHandler implements RequestHandlerInterface
 {
-     private array $middleware = [
-        RouterDispatch::class,
+   private array $middleware = [
+        StartSession::class,  // this
         Authenticate::class,
-        //SuccessMiddleware::class
+        RouterDispatch::class,
+        // SuccessMiddleware::class
     ];
-
     public function __construct(private ContainerInterface $container){}  //step 1
      
     public function handle(Request $request): Response
@@ -33,7 +33,7 @@ class RequestHandler implements RequestHandlerInterface
         // Create a new instance of the middleware call process on it
         // $response = (new $middlewareClass())->process($request, $this);
         $response = $middleware->process($request, $this); // step 3
-//dd($response);
+
         return $response;
     }
 }
