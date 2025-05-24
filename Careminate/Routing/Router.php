@@ -7,6 +7,7 @@ use Careminate\Http\Requests\Request;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
+use Psr\Container\ContainerInterface;
 
 class Router implements RouterInterface
 {
@@ -18,25 +19,28 @@ class Router implements RouterInterface
         $this->routes = $routes;
     }
 
-    public function dispatch(Request $request): array
+    public function dispatch(Request $request, ContainerInterface $container): array
     {
         $routeInfo = $this->extractRouteInfo($request);
 
-        // If favicon or null handler
         if ($routeInfo === null) {
-            return [[fn() => new \Careminate\Http\Responses\Response('', 204), '__invoke'], []];
+            return [fn() => new \Careminate\Http\Responses\Response('', 204), []];
         }
 
         [$handler, $vars] = $routeInfo;
 
-        // Validate the handler
+        if (is_callable($handler)) {
+            return [$handler, $vars];
+        }
+
         if (! is_array($handler) || ! is_string($handler[0]) || ! is_string($handler[1])) {
             throw new \InvalidArgumentException('Invalid route handler definition.');
         }
 
-        [$controller, $method] = $handler;
+        [$controllerId, $method] = $handler;
+        $controller              = $container->get($controllerId);
 
-        return [[new $controller(), $method], $vars];
+        return [[$controller, $method], $vars];
     }
 
     private function extractRouteInfo(Request $request): array | null
