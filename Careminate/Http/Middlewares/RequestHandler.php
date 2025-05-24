@@ -8,12 +8,14 @@ use Careminate\Http\Middlewares\Contracts\RequestHandlerInterface;
 
 class RequestHandler implements RequestHandlerInterface
 {
-   private array $middleware = [
+  private array $middleware = [
         StartSession::class,  // this
         Authenticate::class,
         RouterDispatch::class,
         // SuccessMiddleware::class
+		// Authenticate::class,
     ];
+    
     public function __construct(private ContainerInterface $container){}  //step 1
      
     public function handle(Request $request): Response
