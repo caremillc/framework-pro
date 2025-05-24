@@ -106,3 +106,21 @@ if (! function_exists('storage_path')) {
     }
 }
 
+
+if (!function_exists('redirect')) {
+    /**
+     * Helper function to generate a redirect response.
+     *
+     * @param string $url The URL to redirect to.
+     * @param int $status The HTTP status code (default is 302).
+     * @param array $headers Any additional headers for the redirect.
+     * @return Response The redirect response.
+     */
+    function redirect(string $url, int $status = 302, array $headers = []): Response
+    {
+        // Create a new redirect response using the provided parameters
+        $headers['Location'] = $url;
+
+        return new Response('', $status, $headers);
+    }
+}
