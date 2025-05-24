@@ -13,28 +13,23 @@ class Kernel
 
     public function __construct()
     {
-        // Initialize routes array for dynamic route registration if needed.
+        // Initialize routes array for dynamic route registration
     }
 
-    /**
-     * Handles the incoming request and returns the appropriate response.
-     *
-     * @param Request $request
-     * @return Response
-     */
     public function handle(Request $request): Response
     {
-        // Create the dispatcher with dynamic route registration from the 'web.php' routes file
+        // Create the dispatcher with dynamic route registration
+        // Create a dispatcher
         $dispatcher = simpleDispatcher(function (RouteCollector $routeCollector) {
-            // Dynamically load routes from the external file
+
+               // Dynamically load routes from the external file
             $routes = require_once route_path('web.php');
 
             foreach ($routes as $route) {
-                // Register each route
                 $routeCollector->addRoute(...$route);
             }
-        });
 
+        });
         // Dispatch the request URI and method
         $routeInfo = $dispatcher->dispatch(
             $request->getMethod(),
@@ -44,11 +39,20 @@ class Kernel
         // Unpack route information
         [$status, $handler, $vars] = $routeInfo;
 
-        // Handle the route and return a response based on the dispatch status
+        // dd($routeInfo);
+
+        // Handle the route and return a response
         switch ($status) {
             case Dispatcher::FOUND:
-                // Route matched, execute handler and return response
-                return $handler($vars);
+                // Route matched, call the handler and return the response
+                // return $handler($vars);
+                [$status, [$controller, $method], $vars] = $routeInfo;
+
+                // Call the handler, provided by the route info, in order to create a Response
+                $response = (new $controller())->$method($vars);
+
+                // Call the handler, provided by the route info, in order to create a Response
+                return $response;
 
             case Dispatcher::METHOD_NOT_ALLOWED:
                 // Method not allowed for this route, handle error
@@ -59,8 +63,9 @@ class Kernel
                 return new Response('<h1>404 Not Found</h1>', 404);
         }
 
-        // Fallback: If an unknown error occurs, return a generic 500 response
+        // Fallback: if status is not found
         return new Response('<h1>Something went wrong</h1>', 500);
-    }
-}
 
+    }
+
+}
