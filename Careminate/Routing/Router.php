@@ -30,6 +30,7 @@ class Router implements RouterInterface
         return [[new $controller, $method], $vars];
     }
 
+
     private function extractRouteInfo(Request $request): array | null
     {
         $requestedPath = $request->getPathInfo();
