@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace Careminate\Http;
 
 use Careminate\Http\Requests\Request;
@@ -18,54 +19,37 @@ class Kernel
 
     public function handle(Request $request): Response
     {
-        // Create the dispatcher with dynamic route registration
-        // Create a dispatcher
         $dispatcher = simpleDispatcher(function (RouteCollector $routeCollector) {
-
-               // Dynamically load routes from the external file
             $routes = require_once route_path('web.php');
-
             foreach ($routes as $route) {
                 $routeCollector->addRoute(...$route);
             }
-
         });
-        // Dispatch the request URI and method
+
         $routeInfo = $dispatcher->dispatch(
             $request->getMethod(),
             $request->getPathInfo()
         );
 
-        // Unpack route information
-        [$status, $handler, $vars] = $routeInfo;
-
-        // dd($routeInfo);
-
-        // Handle the route and return a response
-        switch ($status) {
+        switch ($routeInfo[0]) {
             case Dispatcher::FOUND:
-                // Route matched, call the handler and return the response
-                // return $handler($vars);
-                [$status, [$controller, $method], $vars] = $routeInfo;
+                [$handler, $vars] = [$routeInfo[1], $routeInfo[2]];
 
-                // Call the handler, provided by the route info, in order to create a Response
-                $response = (new $controller())->$method($vars);
+                // Ensure $handler is [ControllerClass::class, 'method']
+                [$controller, $method] = $handler;
 
-                // Call the handler, provided by the route info, in order to create a Response
-                return $response;
+                // return (new $controller())->$method($vars);
+                return call_user_func_array([new $controller, $method], $vars);
 
             case Dispatcher::METHOD_NOT_ALLOWED:
-                // Method not allowed for this route, handle error
                 return new Response('<h1>405 Method Not Allowed</h1>', 405);
 
             case Dispatcher::NOT_FOUND:
-                // No matching route found, handle 404 error
                 return new Response('<h1>404 Not Found</h1>', 404);
+
+            default:
+                return new Response('<h1>Unexpected routing error</h1>', 500);
         }
-
-        // Fallback: if status is not found
-        return new Response('<h1>Something went wrong</h1>', 500);
-
     }
-
 }
+
