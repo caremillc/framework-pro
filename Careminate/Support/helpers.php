@@ -1,7 +1,7 @@
 <?php declare (strict_types = 1);
 
 // Just include the file at the top of your script
-require_once 'debug_functions.php';
+// require_once 'debug_functions.php';
 
 if (! function_exists('value')) {
     /**
