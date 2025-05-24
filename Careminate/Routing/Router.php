@@ -35,9 +35,10 @@ class Router implements RouterInterface
     {
         $requestedPath = $request->getPathInfo();
 
-        if ($requestedPath === '/favicon.ico') {
-            return null; // gracefully handled above
-        }
+           // Ignore requests for favicon.ico
+       if ($requestedPath === '/favicon.ico') {
+           return [null, []]; // Return a no-op response
+       }
 
         $dispatcher = simpleDispatcher(function (RouteCollector $routeCollector) {
             $routes = require_once route_path('web.php');

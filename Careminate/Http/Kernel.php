@@ -5,6 +5,7 @@ namespace Careminate\Http;
 use Careminate\Routing\Router;
 use Careminate\Http\Requests\Request;
 use Careminate\Http\Responses\Response;
+use Careminate\Exceptions\HttpException;
 
 /**
  * HTTP Kernel
@@ -41,8 +42,10 @@ class Kernel
             
             $response = call_user_func_array($routeHandler, $vars);
 
+        } catch (HttpException $exception) {
+            $response = new Response($exception->getMessage(), $exception->getStatusCode());
         } catch (\Exception $exception) {
-            $response = new Response($exception->getMessage(), 400);
+            $response = new Response($exception->getMessage(), 500);
         }
         
         return $response;
