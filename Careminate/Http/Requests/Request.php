@@ -11,7 +11,7 @@ use Careminate\Sessions\SessionInterface;
  */
 class Request
 {
-    // private ?SessionInterface $session = null;
+    private ?SessionInterface $session = null;
     // private mixed $routeHandler = null;
     // private array $routeHandlerArgs = [];
 
@@ -259,7 +259,7 @@ class Request
     {
         return $this->isMethod('OPTIONS');
     }
-/*
+
     // Session Handling
     public function setSession(SessionInterface $session): void
     {
@@ -278,7 +278,7 @@ class Request
     {
         return $this->session !== null;
     }
-
+/*
     // Route Handler Support
     public function getRouteHandler(): mixed
     {
