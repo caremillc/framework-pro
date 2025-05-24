@@ -124,3 +124,25 @@ if (!function_exists('redirect')) {
         return new Response('', $status, $headers);
     }
 }
+/**
+ * Sets a flash message in the session.
+ *
+ * This function sets a flash message with a specified type and message content.
+ * The message will be available on the next request and then automatically cleared.
+ *
+ * @param string $type The type of the flash message (e.g., 'success', 'error').
+ * @param string $message The message content to be set in the flash data.
+ *
+ * @return void
+ */
+function flash($type, $message)
+{
+    // Assuming $container is globally accessible or you have a way to get the session
+    global $container;
+
+    // Retrieve the session from the container
+    $session = $container->get(\Careminate\Sessions\SessionInterface::class);
+
+    // Set the flash message
+    $session->setFlash($type, $message);
+}
