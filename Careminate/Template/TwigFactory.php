@@ -98,10 +98,12 @@ class TwigFactory
         // Ensure the CSRF token is properly encoded and sanitized
          echo '<input type="hidden" name="_token" value="' . htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') . '" />';
     }
-    
+
     // Method for generating the spoofed HTTP method field (e.g., PUT,PATCH, DELETE)
     public function getMethodField($method)
     {
-        return '<input type="hidden" name="_method" value="' . htmlspecialchars($method, ENT_QUOTES, 'UTF-8') . '">';
+        echo '<input type="hidden" name="_method" value="' . htmlspecialchars($method, ENT_QUOTES, 'UTF-8') . '">';
     }
+
+    
 }
