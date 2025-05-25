@@ -7,4 +7,5 @@ use Careminate\Http\Responses\Response;
 interface RequestHandlerInterface
 {
     public function handle(Request $request): Response;
+    public function injectMiddleware(array $middleware): void; // Add this line
 }

@@ -12,8 +12,8 @@ use Careminate\Sessions\SessionInterface;
 class Request
 {
     private ?SessionInterface $session = null;
-    // private mixed $routeHandler = null;
-    // private array $routeHandlerArgs = [];
+    private mixed $routeHandler = null;
+    private array $routeHandlerArgs = [];
 
     /**
      * HTTP methods that can contain request body data
@@ -278,7 +278,7 @@ class Request
     {
         return $this->session !== null;
     }
-/*
+
     // Route Handler Support
     public function getRouteHandler(): mixed
     {
@@ -300,5 +300,5 @@ class Request
         $this->routeHandlerArgs = $args;
     }
 
-    */
+   
 }
