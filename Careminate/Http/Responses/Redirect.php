@@ -3,19 +3,28 @@ namespace Careminate\Http\Responses;
 
 class Redirect extends Response
 {
-    public function __construct(string $url)
+    protected ?string $location = null;
+
+    public function __construct(?string $location = null)
     {
-        parent::__construct('', 302, ['Location' => $url]);
+        if ($location) {
+            $this->location = $location;
+        }
+    }
+
+    public function to(string $url): self
+    {
+        $this->location = $url;
+        return $this;
     }
 
     public function send(): void
     {
-        $url = $this->getHeader('Location');
-        if ($url === null) {
+        if (!$this->location) {
             throw new \RuntimeException('No location header set for redirect.');
         }
 
-        header('Location: ' . $url, true, $this->getStatus());
+        header('Location: ' . $this->location);
         exit;
     }
 }

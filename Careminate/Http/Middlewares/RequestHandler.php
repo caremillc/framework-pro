@@ -8,10 +8,10 @@ use Careminate\Http\Middlewares\Contracts\RequestHandlerInterface;
 
 class RequestHandler implements RequestHandlerInterface
 {
-    private array $middleware = [
-        ExtractRouteInfo::class,
+  
+     private array $middleware = [
         StartSession::class,
-        Authenticate::class,
+        ExtractRouteInfo::class,
         RouterDispatch::class
     ];
     
