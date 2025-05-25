@@ -146,3 +146,24 @@ function flash($type, $message)
     // Set the flash message
     $session->setFlash($type, $message);
 }
+
+
+
+if (!function_exists('asset')) {
+    /**
+     * Generate a full URL for an asset in the public directory.
+     *
+     * @param  string  $path
+     * @return string
+     */
+    function asset(string $path): string
+    {
+        // Infer scheme reliably
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+
+        // Default to localhost if HTTP_HOST isn't set
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost:8000';
+
+        return rtrim($scheme . '://' . $host, '/') . '/' . ltrim($path, '/');
+    }
+}

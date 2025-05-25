@@ -38,6 +38,12 @@ class TwigFactory
        $twig->addGlobal('title', $title);
 
        $twig->addFunction(new TwigFunction('csrf', [$this, 'getCsrfToken']));
+
+       $twig->addFunction(new \Twig\TwigFunction('asset', function (string $path) {
+            return asset($path); // Calls the global asset() helper
+        }));
+
+
         return $twig;
     }
 
