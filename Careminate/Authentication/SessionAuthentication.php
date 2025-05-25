@@ -35,7 +35,6 @@ class SessionAuthentication implements SessionAuthInterface
 
         // return true
         return true;
-
     }
 
     public function login(AuthUserInterface $user)
