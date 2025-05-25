@@ -7,6 +7,8 @@ use Psr\Container\ContainerInterface;
 use Careminate\Http\Responses\Response;
 use Careminate\Routing\RouterInterface;
 use Careminate\Exceptions\HttpException;
+use Careminate\Databases\Dbal\EventDispatcher\ResponseEvent;
+use Careminate\Databases\Dbal\EventDispatcher\EventDispatcher;
 use Careminate\Http\Middlewares\Contracts\RequestHandlerInterface;
 
 class Kernel
@@ -16,9 +18,10 @@ class Kernel
     private string $appVersion;
 
     public function __construct(
-        private RouterInterface $router,
+        //private RouterInterface $router,
         private ContainerInterface $container,
-        private RequestHandlerInterface $requestHandler  //step 1
+        private RequestHandlerInterface $requestHandler,  //step 1
+         private EventDispatcher $eventDispatcher  //step 1
     ){
         // Check .env file and configuration values
         if (!file_exists('.env') || !is_readable('.env')) {
@@ -43,28 +46,13 @@ class Kernel
 
         try {
               $response = $this->requestHandler->handle($request);  //step 2
-            // dd($this->container->get(Connection::class));
-            
-			// taken to RouterDispatch
-          // [$routeHandler, $vars] = $this->router->dispatch($request, $this->container);
-
-            
-             // Validate that the routeHandler is actually callable
-            // if (!is_callable($routeHandler)) {
-            //     throw new HttpException('Route handler is not callable', 500);
-            // }
-            
-            //$response = call_user_func_array($routeHandler, $vars);
-            
-            // Ensure the response is actually a Response object
-           // if (!$response instanceof Response) {
-              //  return new Response((string)$response, 200);
-          //  }
-
+           
         } catch (HttpException $exception) {
             $response = $this->createExceptionResponse($exception);
         }
 
+         $this->eventDispatcher->dispatch(new ResponseEvent($request, $response));  //step 2 
+         
         return $response;
     }
 
@@ -86,9 +74,18 @@ class Kernel
 		return new Response('Server error', Response::HTTP_INTERNAL_SERVER_ERROR);
 	}
 
-     public function terminate(Request $request, Response $response): void
-    {
-        $request->getSession()?->clearFlash();
-    }
-    
+    //  public function terminate(Request $request, Response $response): void
+    // {
+    //     $request->getSession()?->clearFlash();
+    // }
+      public function terminate(Request $request, Response $response): void
+	{
+		if ($request->hasSession()) {
+			$session = $request->getSession();
+			// Perform termination tasks with session
+			// $request->getSession()?->clearFlash();
+			$session?->clearFlash();
+		}
+	}
 }
+
