@@ -17,7 +17,7 @@ class SessionAuthentication implements SessionAuthInterface
 
     public function authenticate(string $email, string $password): bool
     {
-        // query db for user using email
+        // query db for user using email(get user entity)
         $user = $this->authRepository->findByEmail($email);
 
         if (! $user) {
