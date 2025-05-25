@@ -46,7 +46,11 @@ class TwigFactory
          // Add the custom 'method' function
          $twig->addFunction(new TwigFunction('method', [$this, 'getMethodField'])); 
 
-
+       // Register the `url()` helper for use in Twig
+        $twig->addFunction(new TwigFunction('url', function ($path = '') {
+            return url($path);
+        }));
+     
         return $twig;
     }
 

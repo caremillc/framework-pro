@@ -167,3 +167,9 @@ if (!function_exists('asset')) {
         return rtrim($scheme . '://' . $host, '/') . '/' . ltrim($path, '/');
     }
 }
+
+if (!function_exists('url')) {
+    function url($path = '') {
+        return rtrim($_ENV['APP_URL'], '/') . '/' . ltrim($path, '/');
+    }
+}
