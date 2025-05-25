@@ -13,7 +13,8 @@ class SessionAuthentication implements SessionAuthInterface
 
     public function __construct(
         private AuthRepositoryInterface $authRepository,
-        private SessionInterface $session) {}
+        private SessionInterface $session
+        ) {}
 
     public function authenticate(string $email, string $password): bool
     {
