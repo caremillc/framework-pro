@@ -88,7 +88,7 @@ class Session implements SessionInterface
         unset($_SESSION[self::FLASH_KEY]);
     }
 
-    public function isAuthenticated(): bool
+    public function auth(): bool
     {
         return $this->has(self::AUTH_KEY);
     }
