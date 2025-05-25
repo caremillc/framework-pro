@@ -55,7 +55,6 @@ class SessionAuthentication implements SessionAuthInterface
         $this->session->remove(Session::AUTH_KEY);
     }
 
-    
    public function getUser(): AuthUserInterface
     {
         if ($this->user !== null) {
