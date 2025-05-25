@@ -14,10 +14,10 @@ class Session implements SessionInterface
             session_start();
         }
 
-        // Ensure CSRF token exists, else generate it
-       // if (!$this->has('csrf_token')) {
-        //    $this->set('csrf_token', bin2hex(random_bytes(32))); // set csrf_token in the session
-      //  }
+       // Ensure CSRF token exists, else generate it
+       if (!$this->has('csrf_token')) {
+           $this->set('csrf_token', bin2hex(random_bytes(32))); // set csrf_token in the session
+       }
     }
 
     public function set(string $key, mixed $value): void

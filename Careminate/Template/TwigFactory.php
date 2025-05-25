@@ -33,10 +33,11 @@ class TwigFactory
          // Pass environment variables to Twig templates
         $this->addEnvironmentVariablesToTwig($twig);
 
-              // Add the title variable if it exists in the session or globally
+       // Add the title variable if it exists in the session or globally
        $title = $this->getTitleFromContext();
        $twig->addGlobal('title', $title);
 
+       $twig->addFunction(new TwigFunction('csrf', [$this, 'getCsrfToken']));
         return $twig;
     }
 
@@ -78,5 +79,14 @@ class TwigFactory
     {
         // Check if a title is set in the session or globally (for example, via controller or other context)
         return $this->session->get('title') ?? config('app.name'); ; // Default to an empty string if no title exists
+    }
+
+    public function getCsrfToken()
+    {
+        // Retrieve the CSRF token from the session
+        $csrfToken = $this->session->get('csrf_token');
+    
+        // Ensure the CSRF token is properly encoded and sanitized
+         echo '<input type="hidden" name="_token" value="' . htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') . '" />';
     }
 }

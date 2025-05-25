@@ -10,8 +10,9 @@ class RequestHandler implements RequestHandlerInterface
 {
   
      private array $middleware = [
-        StartSession::class,
-        ExtractRouteInfo::class,
+         ExtractRouteInfo::class,
+         StartSession::class,
+        VerifyCsrfToken::class, // only this code,
         RouterDispatch::class
     ];
     
@@ -24,6 +25,8 @@ class RequestHandler implements RequestHandlerInterface
         if (empty($this->middleware)) {
             return new Response("It's totally borked, please. Contact support", 500);
         }
+        
+       // dd($this->middleware);
 
         // Get the next middleware class to execute
         $middlewareClass = array_shift($this->middleware);
